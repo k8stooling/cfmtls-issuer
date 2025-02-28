@@ -29,7 +29,7 @@ resources:
 - CFMTLSIssuer_editor_role.yaml
 - CFMTLSIssuer_viewer_role.yaml
 # Comment the following 2 lines if you don't wish for the internal cert-manager
-# approver to approve all sample-issuer.example.com CertificateRequests by
+# approver to approve all mtls-issuer.cfl CertificateRequests by
 # default.
 - cert_manager_controller_approver_clusterrole.yaml
 - cert_manager_controller_approver_clusterrolebinding.yaml

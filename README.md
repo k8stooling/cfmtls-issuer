@@ -196,7 +196,7 @@ but also a table of the recent events associated with that resource.
 The aim is to produce helpful debug output that looks like this:
 
 ```
-$ kubectl describe clusterissuers.sample-issuer.example.com clusterissuer-sample
+$ kubectl describe clusterissuers.mtls-issuer.cfl clusterissuer-sample
 ...
     Type:                  Ready
 Events:
@@ -215,7 +215,7 @@ Events:
   Type     Reason                        Age   From                    Message
   ----     ------                        ----  ----                    -------
   Normal   CertificateRequestReconciler  23m   sample-external-issuer  Initialising Ready condition
-  Warning  CertificateRequestReconciler  23m   sample-external-issuer  Temporary error. Retrying: error getting issuer: Issuer.sample-issuer.example.com "issuer-sample" not found
+  Warning  CertificateRequestReconciler  23m   sample-external-issuer  Temporary error. Retrying: error getting issuer: Issuer.mtls-issuer.cfl "issuer-sample" not found
   Normal   CertificateRequestReconciler  23m   sample-external-issuer  Signed
 
 ```
@@ -244,7 +244,7 @@ We can write a simple end-to-end test which deploys a `Certificate` manifest and
 
 ```console
 kubectl apply --filename config/samples
-kubectl wait --for=condition=Ready --timeout=5s CFMTLSIssuers.sample-issuer.example.com CFMTLSIssuer-sample
+kubectl wait --for=condition=Ready --timeout=5s CFMTLSIssuers.mtls-issuer.cfl CFMTLSIssuer-sample
 kubectl wait --for=condition=Ready --timeout=5s  certificates.cert-manager.io certificate-by-CFMTLSIssuer
 ```
 

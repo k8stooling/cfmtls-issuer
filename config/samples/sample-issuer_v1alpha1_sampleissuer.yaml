@@ -1,4 +1,4 @@
-apiVersion: sample-issuer.example.com/v1alpha1
+apiVersion: mtls-issuer.cfl/v1alpha1
 kind: CFMTLSIssuer
 metadata:
   labels:
@@ -7,4 +7,4 @@ metadata:
   name: CFMTLSIssuer-sample
 spec:
   authSecretName: "CFMTLSIssuer-sample-credentials"
-  url: "http://sample-issuer.example.com/api/v1"
+  url: "http://mtls-issuer.cfl/api/v1"

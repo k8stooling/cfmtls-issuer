@@ -271,7 +271,7 @@ var _ = Describe("Manager", Ordered, func() {
 
 			By("waiting for CFMTLSIssuer sample resources to become Ready")
 			cmd = exec.Command("kubectl", "wait", "--for=condition=Ready", "--timeout=5s",
-				"CFMTLSIssuers.sample-issuer.example.com", "CFMTLSIssuer-sample")
+				"CFMTLSIssuers.mtls-issuer.cfl", "CFMTLSIssuer-sample")
 			_, err = utils.Run(cmd)
 			Expect(err).NotTo(HaveOccurred(), "CFMTLSIssuer did not get Ready")
 			cmd = exec.Command("kubectl", "wait", "--for=condition=Ready", "--timeout=5s",
@@ -285,7 +285,7 @@ var _ = Describe("Manager", Ordered, func() {
 
 			By("waiting for CFMTLSClusterIssuer sample resources to become Ready")
 			cmd = exec.Command("kubectl", "wait", "--for=condition=Ready", "--timeout=5s",
-				"CFMTLSClusterIssuers.sample-issuer.example.com", "CFMTLSClusterIssuer-sample")
+				"CFMTLSClusterIssuers.mtls-issuer.cfl", "CFMTLSClusterIssuer-sample")
 			_, err = utils.Run(cmd)
 			Expect(err).NotTo(HaveOccurred(), "CFMTLSClusterIssuer did not get Ready")
 			cmd = exec.Command("kubectl", "wait", "--for=condition=Ready", "--timeout=5s",
