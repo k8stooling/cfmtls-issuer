@@ -2,8 +2,8 @@
 # since it depends on service name and namespace that are out of this kustomize package.
 # It should be run by config/default
 resources:
-- bases/sample-issuer.example.com_sampleissuers.yaml
-- bases/sample-issuer.example.com_sampleclusterissuers.yaml
+- bases/sample-issuer.example.com_CFMTLSIssuers.yaml
+- bases/sample-issuer.example.com_CFMTLSClusterIssuers.yaml
 # +kubebuilder:scaffold:crdkustomizeresource
 
 patches:

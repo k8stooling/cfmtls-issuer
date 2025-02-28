@@ -12,7 +12,7 @@ This repository provides an example of an [External Issuer] built using the [iss
 ## Install
 
 ```console
-kubectl apply -f https://github.com/cert-manager/sample-external-issuer/releases/download/v0.1.0/install.yaml
+kubectl apply -f https://github.com/krisek/cfmtls-issuer/releases/download/v0.1.0/install.yaml
 ```
 
 ## Demo
@@ -68,7 +68,7 @@ You can start by creating a repository on GitHub or you can create it locally.
 ```console
 mkdir my-external-issuer
 cd my-external-issuer
-git clone https://github.com/cert-manager/sample-external-issuer.git .
+git clone https://github.com/krisek/cfmtls-issuer.git .
 git remote rm origin
 git remote add origin https://github.com/<username>/my-external-issuer.git
 ```
@@ -91,7 +91,7 @@ An [External Issuer] must implement two custom resources for compatibility with 
 NOTE: It is important to understand the [Concept of Issuers] before proceeding.
 
 The `MyIssuer` and `MyClusterIssuer` custom resources can be defined in the `api/v1alpha1` directory.
-Use the `SampleIssuer` and `SampleClusterIssuer` definitions as a starting point.
+Use the `CFMTLSIssuer` and `CFMTLSClusterIssuer` definitions as a starting point.
 
 Additionally, the group, version and kind of the custom resources must be customised to be unique to your issuer:
 
@@ -229,7 +229,7 @@ You can also write unit tests to verify the Reconciler events by using a [record
 
 [record.FakeRecorder]: https://pkg.go.dev/k8s.io/client-go/tools/record#FakeRecorder
 
-See [PR 10: Generate Kubernetes Events](https://github.com/cert-manager/sample-external-issuer/pull/10) for an example of how you might generate events in your issuer.
+See [PR 10: Generate Kubernetes Events](https://github.com/krisek/cfmtls-issuer/pull/10) for an example of how you might generate events in your issuer.
 
 ### End-to-end tests
 
@@ -244,8 +244,8 @@ We can write a simple end-to-end test which deploys a `Certificate` manifest and
 
 ```console
 kubectl apply --filename config/samples
-kubectl wait --for=condition=Ready --timeout=5s sampleissuers.sample-issuer.example.com sampleissuer-sample
-kubectl wait --for=condition=Ready --timeout=5s  certificates.cert-manager.io certificate-by-sampleissuer
+kubectl wait --for=condition=Ready --timeout=5s CFMTLSIssuers.sample-issuer.example.com CFMTLSIssuer-sample
+kubectl wait --for=condition=Ready --timeout=5s  certificates.cert-manager.io certificate-by-CFMTLSIssuer
 ```
 
 You can of course write more complete tests than this,
@@ -302,7 +302,7 @@ Here are some example values:
 
 Click the `Publish release` button to trigger the automated release process:
 
-* A Docker image will be generated and published to `ghcr.io/cert-manager/sample-external-issuer/controller` with the chosen tag.
+* A Docker image will be generated and published to `ghcr.io/krisek/cfmtls-issuer/controller` with the chosen tag.
 * An `install.yaml` file will be generated and attached to the release.
 
 ## Links
@@ -315,4 +315,4 @@ Click the `Publish release` button to trigger the automated release process:
 [Distroless Docker Image]: https://github.com/GoogleContainerTools/distroless
 [Configure a Security Context]: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
 [kube-rbac-proxy]: https://github.com/brancz/kube-rbac-proxy
-[GitHub New Release Page]: https://github.com/cert-manager/sample-external-issuer/releases/new
+[GitHub New Release Page]: https://github.com/krisek/cfmtls-issuer/releases/new

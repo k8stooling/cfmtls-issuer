@@ -1,11 +1,11 @@
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
-  name: certificate-by-sampleclusterissuer
+  name: certificate-by-CFMTLSClusterIssuer
 spec:
-  commonName: certificate-by-sampleclusterissuer.example.com
-  secretName: certificate-by-sampleclusterissuer
+  commonName: certificate-by-CFMTLSClusterIssuer.example.com
+  secretName: certificate-by-CFMTLSClusterIssuer
   issuerRef:
-    name: sampleclusterissuer-sample
+    name: CFMTLSClusterIssuer-sample
     group: sample-issuer.example.com
-    kind: SampleClusterIssuer
+    kind: CFMTLSClusterIssuer

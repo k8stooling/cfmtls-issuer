@@ -1,4 +1,4 @@
-module github.com/cert-manager/sample-external-issuer
+module github.com/krisek/cfmtls-issuer
 
 go 1.23.0
 

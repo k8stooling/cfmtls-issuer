@@ -31,8 +31,8 @@ import (
 // +kubebuilder:printcolumn:name="Generation",type="integer",JSONPath=".metadata.generation"
 // +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp"
 
-// SampleIssuer is the Schema for the sampleissuers API.
-type SampleIssuer struct {
+// CFMTLSIssuer is the Schema for the CFMTLSIssuers API.
+type CFMTLSIssuer struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
@@ -40,21 +40,21 @@ type SampleIssuer struct {
 	Status v1alpha1.IssuerStatus `json:"status,omitempty"`
 }
 
-// IssuerSpec defines the desired state of SampleIssuer
+// IssuerSpec defines the desired state of CFMTLSIssuer
 type IssuerSpec struct {
 	// URL is the base URL for the endpoint of the signing service,
 	// for example: "https://sample-signer.example.com/api".
 	URL string `json:"url"`
 
 	// A reference to a Secret in the same namespace as the referent. If the
-	// referent is a SampleClusterIssuer, the reference instead refers to the resource
+	// referent is a CFMTLSClusterIssuer, the reference instead refers to the resource
 	// with the given name in the configured 'cluster resource namespace', which
 	// is set as a flag on the controller component (and defaults to the
 	// namespace that the controller runs in).
 	AuthSecretName string `json:"authSecretName"`
 }
 
-func (vi *SampleIssuer) GetStatus() *v1alpha1.IssuerStatus {
+func (vi *CFMTLSIssuer) GetStatus() *v1alpha1.IssuerStatus {
 	return &vi.Status
 }
 
@@ -66,24 +66,24 @@ func (vi *SampleIssuer) GetStatus() *v1alpha1.IssuerStatus {
 // "<issuer resource (plural)>.<issuer group>". For example, the value
 // "simpleclusterissuers.issuer.cert-manager.io" will match all CSRs
 // with an issuerName set to eg. "simpleclusterissuers.issuer.cert-manager.io/issuer1".
-func (vi *SampleIssuer) GetIssuerTypeIdentifier() string {
+func (vi *CFMTLSIssuer) GetIssuerTypeIdentifier() string {
 	// ACTION REQUIRED: Change this to a unique string that identifies your issuer
-	return "sampleissuers.sample-issuer.example.com"
+	return "CFMTLSIssuers.sample-issuer.example.com"
 }
 
 // issuer-lib requires that we implement the Issuer interface
 // so that it can interact with our Issuer resource.
-var _ v1alpha1.Issuer = &SampleIssuer{}
+var _ v1alpha1.Issuer = &CFMTLSIssuer{}
 
 // +kubebuilder:object:root=true
 
-// SampleIssuerList contains a list of SampleIssuer.
-type SampleIssuerList struct {
+// CFMTLSIssuerList contains a list of CFMTLSIssuer.
+type CFMTLSIssuerList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
-	Items           []SampleIssuer `json:"items"`
+	Items           []CFMTLSIssuer `json:"items"`
 }
 
 func init() {
-	SchemeBuilder.Register(&SampleIssuer{}, &SampleIssuerList{})
+	SchemeBuilder.Register(&CFMTLSIssuer{}, &CFMTLSIssuerList{})
 }

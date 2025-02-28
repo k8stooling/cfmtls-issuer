@@ -50,8 +50,8 @@ rules:
 - apiGroups:
   - certificates.k8s.io
   resourceNames:
-  - sampleclusterissuers.sample-issuer.example.com/*
-  - sampleissuers.sample-issuer.example.com/*
+  - CFMTLSClusterIssuers.sample-issuer.example.com/*
+  - CFMTLSIssuers.sample-issuer.example.com/*
   resources:
   - signers
   verbs:
@@ -59,8 +59,8 @@ rules:
 - apiGroups:
   - sample-issuer.example.com
   resources:
-  - sampleclusterissuers
-  - sampleissuers
+  - CFMTLSClusterIssuers
+  - CFMTLSIssuers
   verbs:
   - get
   - list
@@ -68,7 +68,7 @@ rules:
 - apiGroups:
   - sample-issuer.example.com
   resources:
-  - sampleclusterissuers/status
-  - sampleissuers/status
+  - CFMTLSClusterIssuers/status
+  - CFMTLSIssuers/status
   verbs:
   - patch

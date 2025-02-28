@@ -32,8 +32,8 @@ import (
 // +kubebuilder:printcolumn:name="Generation",type="integer",JSONPath=".metadata.generation"
 // +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp"
 
-// SampleClusterIssuer is the Schema for the sampleclusterissuers API.
-type SampleClusterIssuer struct {
+// CFMTLSClusterIssuer is the Schema for the CFMTLSClusterIssuers API.
+type CFMTLSClusterIssuer struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
@@ -41,7 +41,7 @@ type SampleClusterIssuer struct {
 	Status v1alpha1.IssuerStatus `json:"status,omitempty"`
 }
 
-func (vi *SampleClusterIssuer) GetStatus() *v1alpha1.IssuerStatus {
+func (vi *CFMTLSClusterIssuer) GetStatus() *v1alpha1.IssuerStatus {
 	return &vi.Status
 }
 
@@ -53,24 +53,24 @@ func (vi *SampleClusterIssuer) GetStatus() *v1alpha1.IssuerStatus {
 // "<issuer resource (plural)>.<issuer group>". For example, the value
 // "simpleclusterissuers.issuer.cert-manager.io" will match all CSRs
 // with an issuerName set to eg. "simpleclusterissuers.issuer.cert-manager.io/issuer1".
-func (vi *SampleClusterIssuer) GetIssuerTypeIdentifier() string {
+func (vi *CFMTLSClusterIssuer) GetIssuerTypeIdentifier() string {
 	// ACTION REQUIRED: Change this to a unique string that identifies your cluster issuer
-	return "sampleclusterissuers.sample-issuer.example.com"
+	return "CFMTLSClusterIssuers.sample-issuer.example.com"
 }
 
 // issuer-lib requires that we implement the Issuer interface
 // so that it can interact with our Issuer resource.
-var _ v1alpha1.Issuer = &SampleClusterIssuer{}
+var _ v1alpha1.Issuer = &CFMTLSClusterIssuer{}
 
 // +kubebuilder:object:root=true
 
-// SampleClusterIssuerList contains a list of SampleClusterIssuer.
-type SampleClusterIssuerList struct {
+// CFMTLSClusterIssuerList contains a list of CFMTLSClusterIssuer.
+type CFMTLSClusterIssuerList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
-	Items           []SampleClusterIssuer `json:"items"`
+	Items           []CFMTLSClusterIssuer `json:"items"`
 }
 
 func init() {
-	SchemeBuilder.Register(&SampleClusterIssuer{}, &SampleClusterIssuerList{})
+	SchemeBuilder.Register(&CFMTLSClusterIssuer{}, &CFMTLSClusterIssuerList{})
 }

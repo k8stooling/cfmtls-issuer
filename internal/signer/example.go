@@ -23,15 +23,15 @@ import (
 
 	capi "k8s.io/api/certificates/v1beta1"
 
-	sampleissuerapi "github.com/cert-manager/sample-external-issuer/api/v1alpha1"
-	"github.com/cert-manager/sample-external-issuer/internal/controllers"
+	CFMTLSIssuerapi "github.com/krisek/cfmtls-issuer/api/v1alpha1"
+	"github.com/krisek/cfmtls-issuer/internal/controllers"
 )
 
-func ExampleHealthCheckerFromIssuerAndSecretData(*sampleissuerapi.IssuerSpec, map[string][]byte) (controllers.HealthChecker, error) {
+func ExampleHealthCheckerFromIssuerAndSecretData(*CFMTLSIssuerapi.IssuerSpec, map[string][]byte) (controllers.HealthChecker, error) {
 	return &exampleSigner{}, nil
 }
 
-func ExampleSignerFromIssuerAndSecretData(*sampleissuerapi.IssuerSpec, map[string][]byte) (controllers.Signer, error) {
+func ExampleSignerFromIssuerAndSecretData(*CFMTLSIssuerapi.IssuerSpec, map[string][]byte) (controllers.Signer, error) {
 	return &exampleSigner{}, nil
 }
 

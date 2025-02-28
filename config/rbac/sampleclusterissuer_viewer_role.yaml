@@ -11,12 +11,12 @@ metadata:
   labels:
     app.kubernetes.io/name: sample-external-issuer
     app.kubernetes.io/managed-by: kustomize
-  name: sampleclusterissuer-viewer-role
+  name: CFMTLSClusterIssuer-viewer-role
 rules:
 - apiGroups:
   - sample-issuer.example.com
   resources:
-  - sampleclusterissuers
+  - CFMTLSClusterIssuers
   verbs:
   - get
   - list
@@ -24,6 +24,6 @@ rules:
 - apiGroups:
   - sample-issuer.example.com
   resources:
-  - sampleclusterissuers/status
+  - CFMTLSClusterIssuers/status
   verbs:
   - get

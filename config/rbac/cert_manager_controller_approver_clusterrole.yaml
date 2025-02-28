@@ -11,5 +11,5 @@ rules:
   verbs:
   - approve
   resourceNames:
-  - sampleissuers.sample-issuer.example.com/*
-  - sampleclusterissuers.sample-issuer.example.com/*
+  - CFMTLSIssuers.sample-issuer.example.com/*
+  - CFMTLSClusterIssuers.sample-issuer.example.com/*

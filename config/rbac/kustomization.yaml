@@ -22,12 +22,12 @@ resources:
 # default, aiding admins in cluster management. Those roles are
 # not used by the sample-external-issuer itself. You can comment the following lines
 # if you do not want those helpers be installed with your Project.
-- sampleclusterissuer_admin_role.yaml
-- sampleclusterissuer_editor_role.yaml
-- sampleclusterissuer_viewer_role.yaml
-- sampleissuer_admin_role.yaml
-- sampleissuer_editor_role.yaml
-- sampleissuer_viewer_role.yaml
+- CFMTLSClusterIssuer_admin_role.yaml
+- CFMTLSClusterIssuer_editor_role.yaml
+- CFMTLSClusterIssuer_viewer_role.yaml
+- CFMTLSIssuer_admin_role.yaml
+- CFMTLSIssuer_editor_role.yaml
+- CFMTLSIssuer_viewer_role.yaml
 # Comment the following 2 lines if you don't wish for the internal cert-manager
 # approver to approve all sample-issuer.example.com CertificateRequests by
 # default.

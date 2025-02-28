@@ -1,10 +1,10 @@
 apiVersion: sample-issuer.example.com/v1alpha1
-kind: SampleIssuer
+kind: CFMTLSIssuer
 metadata:
   labels:
     app.kubernetes.io/name: sample-external-issuer
     app.kubernetes.io/managed-by: kustomize
-  name: sampleissuer-sample
+  name: CFMTLSIssuer-sample
 spec:
-  authSecretName: "sampleissuer-sample-credentials"
+  authSecretName: "CFMTLSIssuer-sample-credentials"
   url: "http://sample-issuer.example.com/api/v1"

@@ -42,11 +42,11 @@ import (
 	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
 
-	"github.com/cert-manager/sample-external-issuer/internal/controllers"
-	"github.com/cert-manager/sample-external-issuer/internal/signer"
-	"github.com/cert-manager/sample-external-issuer/internal/version"
+	"github.com/krisek/cfmtls-issuer/internal/controllers"
+	"github.com/krisek/cfmtls-issuer/internal/signer"
+	"github.com/krisek/cfmtls-issuer/internal/version"
 
-	sampleissuerv1alpha1 "github.com/cert-manager/sample-external-issuer/api/v1alpha1"
+	CFMTLSIssuerv1alpha1 "github.com/krisek/cfmtls-issuer/api/v1alpha1"
 	// +kubebuilder:scaffold:imports
 )
 
@@ -61,7 +61,7 @@ func init() {
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
 	utilruntime.Must(cmapi.AddToScheme(scheme))
 
-	utilruntime.Must(sampleissuerv1alpha1.AddToScheme(scheme))
+	utilruntime.Must(CFMTLSIssuerv1alpha1.AddToScheme(scheme))
 	// +kubebuilder:scaffold:scheme
 }
 

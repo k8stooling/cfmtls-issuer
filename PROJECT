@@ -6,21 +6,21 @@ domain: example.com
 layout:
 - go.kubebuilder.io/v4
 projectName: sample-external-issuer
-repo: github.com/cert-manager/sample-external-issuer
+repo: github.com/krisek/cfmtls-issuer
 resources:
 - api:
     crdVersion: v1
     namespaced: true
   domain: example.com
   group: sample-issuer
-  kind: SampleIssuer
-  path: github.com/cert-manager/sample-external-issuer/api/v1alpha1
+  kind: CFMTLSIssuer
+  path: github.com/krisek/cfmtls-issuer/api/v1alpha1
   version: v1alpha1
 - api:
     crdVersion: v1
   domain: example.com
   group: sample-issuer
-  kind: SampleClusterIssuer
-  path: github.com/cert-manager/sample-external-issuer/api/v1alpha1
+  kind: CFMTLSClusterIssuer
+  path: github.com/krisek/cfmtls-issuer/api/v1alpha1
   version: v1alpha1
 version: "3"

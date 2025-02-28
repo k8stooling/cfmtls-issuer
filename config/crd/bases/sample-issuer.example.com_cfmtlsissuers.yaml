@@ -4,15 +4,15 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.17.1
-  name: CFMTLSClusterIssuers.sample-issuer.example.com
+  name: cfmtlsissuers.sample-issuer.example.com
 spec:
   group: sample-issuer.example.com
   names:
-    kind: CFMTLSClusterIssuer
-    listKind: CFMTLSClusterIssuerList
-    plural: CFMTLSClusterIssuers
-    singular: CFMTLSClusterIssuer
-  scope: Cluster
+    kind: CFMTLSIssuer
+    listKind: CFMTLSIssuerList
+    plural: cfmtlsissuers
+    singular: cfmtlsissuer
+  scope: Namespaced
   versions:
   - additionalPrinterColumns:
     - jsonPath: .status.conditions[?(@.type=="Ready")].status
@@ -39,8 +39,7 @@ spec:
     name: v1alpha1
     schema:
       openAPIV3Schema:
-        description: CFMTLSClusterIssuer is the Schema for the CFMTLSClusterIssuers
-          API.
+        description: CFMTLSIssuer is the Schema for the CFMTLSIssuers API.
         properties:
           apiVersion:
             description: |-

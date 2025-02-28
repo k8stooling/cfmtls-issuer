@@ -17,10 +17,13 @@ limitations under the License.
 package controllers
 
 import (
+	"bytes" // 🔹 Added missing import
 	"context"
 	"crypto/x509"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"net/http"
 	"time"
 
 	"github.com/cert-manager/cert-manager/pkg/util/pki"
@@ -32,7 +35,7 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	sampleissuerapi "github.com/cert-manager/sample-external-issuer/api/v1alpha1"
+	CFMTLSIssuerapi "github.com/krisek/cfmtls-issuer/api/v1alpha1"
 )
 
 var (
@@ -44,17 +47,22 @@ var (
 	errSignerSign    = errors.New("failed to sign")
 )
 
+type CloudflareSigner struct {
+	APIKey string
+	ZoneID string
+}
+
 type HealthChecker interface {
 	Check() error
 }
 
-type HealthCheckerBuilder func(*sampleissuerapi.IssuerSpec, map[string][]byte) (HealthChecker, error)
+type HealthCheckerBuilder func(*CFMTLSIssuerapi.IssuerSpec, map[string][]byte) (HealthChecker, error)
 
 type Signer interface {
 	Sign(*x509.Certificate) ([]byte, error)
 }
 
-type SignerBuilder func(*sampleissuerapi.IssuerSpec, map[string][]byte) (Signer, error)
+type SignerBuilder func(*CFMTLSIssuerapi.IssuerSpec, map[string][]byte) (Signer, error)
 
 type Issuer struct {
 	HealthCheckerBuilder     HealthCheckerBuilder
@@ -64,37 +72,37 @@ type Issuer struct {
 	client client.Client
 }
 
-// +kubebuilder:rbac:groups=sample-issuer.example.com,resources=sampleclusterissuers;sampleissuers,verbs=get;list;watch
-// +kubebuilder:rbac:groups=sample-issuer.example.com,resources=sampleclusterissuers/status;sampleissuers/status,verbs=patch
+// +kubebuilder:rbac:groups=sample-issuer.example.com,resources=CFMTLSClusterIssuers;CFMTLSIssuers,verbs=get;list;watch
+// +kubebuilder:rbac:groups=sample-issuer.example.com,resources=CFMTLSClusterIssuers/status;CFMTLSIssuers/status,verbs=patch
 // +kubebuilder:rbac:groups="",resources=events,verbs=create;patch
 // +kubebuilder:rbac:groups="",resources=secrets,verbs=get;list;watch
 // +kubebuilder:rbac:groups=cert-manager.io,resources=certificaterequests,verbs=get;list;watch
 // +kubebuilder:rbac:groups=cert-manager.io,resources=certificaterequests/status,verbs=patch
 // +kubebuilder:rbac:groups=certificates.k8s.io,resources=certificatesigningrequests,verbs=get;list;watch
 // +kubebuilder:rbac:groups=certificates.k8s.io,resources=certificatesigningrequests/status,verbs=patch
-// +kubebuilder:rbac:groups=certificates.k8s.io,resources=signers,verbs=sign,resourceNames=sampleclusterissuers.sample-issuer.example.com/*;sampleissuers.sample-issuer.example.com/*
+// +kubebuilder:rbac:groups=certificates.k8s.io,resources=signers,verbs=sign,resourceNames=CFMTLSClusterIssuers.sample-issuer.example.com/*;CFMTLSIssuers.sample-issuer.example.com/*
 
 func (s Issuer) SetupWithManager(ctx context.Context, mgr ctrl.Manager) error {
 	s.client = mgr.GetClient()
 
 	return (&controllers.CombinedController{
-		IssuerTypes:        []issuerapi.Issuer{&sampleissuerapi.SampleIssuer{}},
-		ClusterIssuerTypes: []issuerapi.Issuer{&sampleissuerapi.SampleClusterIssuer{}},
+		IssuerTypes:        []issuerapi.Issuer{&CFMTLSIssuerapi.CFMTLSIssuer{}},
+		ClusterIssuerTypes: []issuerapi.Issuer{&CFMTLSIssuerapi.CFMTLSClusterIssuer{}},
 
-		FieldOwner:       "sampleissuer.cert-manager.io",
+		FieldOwner:       "CFMTLSIssuer.cert-manager.io",
 		MaxRetryDuration: 1 * time.Minute,
 
 		Sign:          s.Sign,
 		Check:         s.Check,
-		EventRecorder: mgr.GetEventRecorderFor("sampleissuer.cert-manager.io"),
+		EventRecorder: mgr.GetEventRecorderFor("CFMTLSIssuer.cert-manager.io"),
 	}).SetupWithManager(ctx, mgr)
 }
 
-func (o *Issuer) getIssuerDetails(issuerObject issuerapi.Issuer) (*sampleissuerapi.IssuerSpec, string, error) {
+func (o *Issuer) getIssuerDetails(issuerObject issuerapi.Issuer) (*CFMTLSIssuerapi.IssuerSpec, string, error) {
 	switch t := issuerObject.(type) {
-	case *sampleissuerapi.SampleIssuer:
+	case *CFMTLSIssuerapi.CFMTLSIssuer:
 		return &t.Spec, issuerObject.GetNamespace(), nil
-	case *sampleissuerapi.SampleClusterIssuer:
+	case *CFMTLSIssuerapi.CFMTLSClusterIssuer:
 		return &t.Spec, o.ClusterResourceNamespace, nil
 	default:
 		// A permanent error will cause the Issuer to not retry until the
@@ -105,7 +113,50 @@ func (o *Issuer) getIssuerDetails(issuerObject issuerapi.Issuer) (*sampleissuera
 	}
 }
 
-func (o *Issuer) getSecretData(ctx context.Context, issuerSpec *sampleissuerapi.IssuerSpec, namespace string) (map[string][]byte, error) {
+func (c *CloudflareSigner) Sign(cert *x509.Certificate) ([]byte, error) {
+	requestData := map[string]string{
+		"csr":       string(cert.Raw),
+		"hostnames": cert.DNSNames[0],
+	}
+
+	requestBody, err := json.Marshal(requestData)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal request: %w", err)
+	}
+
+	req, err := http.NewRequest("POST", fmt.Sprintf("https://api.cloudflare.com/client/v4/zones/%s/certificates", c.ZoneID), bytes.NewBuffer(requestBody))
+	if err != nil {
+		return nil, fmt.Errorf("failed to create HTTP request: %w", err)
+	}
+
+	req.Header.Set("Authorization", "Bearer "+c.APIKey)
+	req.Header.Set("Content-Type", "application/json")
+
+	client := &http.Client{Timeout: 10 * time.Second}
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("failed to send request to Cloudflare: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("Cloudflare API responded with status: %d", resp.StatusCode)
+	}
+
+	var result map[string]interface{}
+	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+		return nil, fmt.Errorf("failed to parse Cloudflare response: %w", err)
+	}
+
+	certPEM, ok := result["certificate"].(string)
+	if !ok {
+		return nil, errors.New("invalid certificate response from Cloudflare API")
+	}
+
+	return []byte(certPEM), nil
+}
+
+func (o *Issuer) getSecretData(ctx context.Context, issuerSpec *CFMTLSIssuerapi.IssuerSpec, namespace string) (map[string][]byte, error) {
 	secretName := types.NamespacedName{
 		Namespace: namespace,
 		Name:      issuerSpec.AuthSecretName,
@@ -140,27 +191,21 @@ func (o *Issuer) Check(ctx context.Context, issuerObject issuerapi.Issuer) error
 	return err
 }
 
-// Sign returns a signed certificate for the supplied CertificateRequestObject (a cert-manager CertificateRequest resource or
-// a kubernetes CertificateSigningRequest resource). The CertificateRequestObject contains a GetRequest method that returns
-// a certificate template that can be used as a starting point for the generated certificate.
-// The Sign method should return a PEMBundle containing the signed certificate and any intermediate certificates (see the PEMBundle docs for more information).
-// If the Sign method returns an error, the issuance will be retried until the MaxRetryDuration is reached.
-// Special errors and cases can be found in the issuer-lib README: https://github.com/cert-manager/issuer-lib/tree/main?tab=readme-ov-file#how-it-works
 func (o *Issuer) Sign(ctx context.Context, cr signer.CertificateRequestObject, issuerObject issuerapi.Issuer) (signer.PEMBundle, error) {
 	issuerSpec, namespace, err := o.getIssuerDetails(issuerObject)
 	if err != nil {
-		// Returning an IssuerError will change the status of the Issuer to Failed too.
-		return signer.PEMBundle{}, signer.IssuerError{
-			Err: err,
-		}
+		return signer.PEMBundle{}, signer.IssuerError{Err: err}
 	}
 
 	secretData, err := o.getSecretData(ctx, issuerSpec, namespace)
 	if err != nil {
-		// Returning an IssuerError will change the status of the Issuer to Failed too.
-		return signer.PEMBundle{}, signer.IssuerError{
-			Err: err,
-		}
+		return signer.PEMBundle{}, signer.IssuerError{Err: err}
+	}
+
+	cfAPIKey := string(secretData["cloudflare-api-key"])
+	zoneID := string(secretData["cloudflare-zone-id"])
+	if cfAPIKey == "" || zoneID == "" {
+		return signer.PEMBundle{}, errors.New("missing Cloudflare API key or Zone ID in secret")
 	}
 
 	certTemplate, _, _, err := cr.GetRequest()
@@ -168,14 +213,10 @@ func (o *Issuer) Sign(ctx context.Context, cr signer.CertificateRequestObject, i
 		return signer.PEMBundle{}, err
 	}
 
-	signerObj, err := o.SignerBuilder(issuerSpec, secretData)
-	if err != nil {
-		return signer.PEMBundle{}, fmt.Errorf("%w: %v", errSignerBuilder, err)
-	}
-
+	signerObj := &CloudflareSigner{APIKey: cfAPIKey, ZoneID: zoneID}
 	signed, err := signerObj.Sign(certTemplate)
 	if err != nil {
-		return signer.PEMBundle{}, fmt.Errorf("%w: %v", errSignerSign, err)
+		return signer.PEMBundle{}, err
 	}
 
 	bundle, err := pki.ParseSingleCertificateChainPEM(signed)

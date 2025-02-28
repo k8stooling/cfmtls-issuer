@@ -4,14 +4,14 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.17.1
-  name: CFMTLSClusterIssuers.sample-issuer.example.com
+  name: cfmtlsclusterissuers.sample-issuer.example.com
 spec:
   group: sample-issuer.example.com
   names:
     kind: CFMTLSClusterIssuer
     listKind: CFMTLSClusterIssuerList
-    plural: CFMTLSClusterIssuers
-    singular: CFMTLSClusterIssuer
+    plural: cfmtlsclusterissuers
+    singular: cfmtlsclusterissuer
   scope: Cluster
   versions:
   - additionalPrinterColumns:
