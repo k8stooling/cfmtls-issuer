@@ -25,7 +25,6 @@ import (
 	"fmt"
 	"net/http"
 	"time"
-
 	"github.com/cert-manager/cert-manager/pkg/util/pki"
 	issuerapi "github.com/cert-manager/issuer-lib/api/v1alpha1"
 	"github.com/cert-manager/issuer-lib/controllers"
@@ -34,8 +33,12 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	CFMTLSIssuerapi "github.com/krisek/cfmtls-issuer/api/v1alpha1"
+
+	// "encoding/base64"
+
 )
 
 var (
@@ -71,6 +74,19 @@ type Issuer struct {
 
 	client client.Client
 }
+
+func convertDurationToDays(duration string) (int, error) {
+    // Parse the duration string (e.g., "8760h0m0s")
+    parsedDuration, err := time.ParseDuration(duration)
+    if err != nil {
+        return 0, err
+    }
+
+    // Convert the duration to days (1 day = 24 hours)
+    days := int(parsedDuration.Hours() / 24)
+    return days, nil
+}
+
 
 // +kubebuilder:rbac:groups=mtls-issuer.cfl,resources=CFMTLSClusterIssuers;CFMTLSIssuers,verbs=get;list;watch
 // +kubebuilder:rbac:groups=mtls-issuer.cfl,resources=CFMTLSClusterIssuers/status;CFMTLSIssuers/status,verbs=patch
@@ -113,18 +129,33 @@ func (o *Issuer) getIssuerDetails(issuerObject issuerapi.Issuer) (*CFMTLSIssuera
 	}
 }
 
-func (c *CloudflareSigner) Sign(cert *x509.Certificate) ([]byte, error) {
-	requestData := map[string]string{
-		"csr":       string(cert.Raw),
-		"hostnames": cert.DNSNames[0],
+// isClientAuthCert checks if the certificate request includes client authentication usage.
+func isClientAuthCert(usages []x509.ExtKeyUsage) bool {
+    for _, usage := range usages {
+        if usage == x509.ExtKeyUsageClientAuth {
+            return true
+        }
+    }
+    return false
+}
+
+func (c *CloudflareSigner) Sign(ctx context.Context, csrPEM []byte, validity_days int64) ([]byte, error) {
+	logger := log.FromContext(ctx).WithName("Sign")
+
+	requestData := map[string]interface{}{
+		"csr": string(csrPEM),
+		"validity_days": validity_days,
 	}
 
-	requestBody, err := json.Marshal(requestData)
+	// 🔹 Log the request being sent
+	requestBody, err := json.MarshalIndent(requestData, "", "  ") // Pretty-print JSON
 	if err != nil {
 		return nil, fmt.Errorf("failed to marshal request: %w", err)
 	}
 
-	req, err := http.NewRequest("POST", fmt.Sprintf("https://api.cloudflare.com/client/v4/zones/%s/certificates", c.ZoneID), bytes.NewBuffer(requestBody))
+	logger.V(2).Info("Full request to Cloudflare API:\n", string(requestBody))
+
+	req, err := http.NewRequest("POST", fmt.Sprintf("https://api.cloudflare.com/client/v4/zones/%s/client_certificates", c.ZoneID), bytes.NewBuffer(requestBody))
 	if err != nil {
 		return nil, fmt.Errorf("failed to create HTTP request: %w", err)
 	}
@@ -139,22 +170,34 @@ func (c *CloudflareSigner) Sign(cert *x509.Certificate) ([]byte, error) {
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode != http.StatusOK {
+	// 🔹 Log Cloudflare's response
+	respBody := new(bytes.Buffer)
+	_, _ = respBody.ReadFrom(resp.Body)
+	logger.V(2).Info("Cloudflare API Response:", resp.Status, "\n", respBody.String())
+
+	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusCreated {
 		return nil, fmt.Errorf("Cloudflare API responded with status: %d", resp.StatusCode)
 	}
 
 	var result map[string]interface{}
-	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+	if err := json.NewDecoder(respBody).Decode(&result); err != nil {
 		return nil, fmt.Errorf("failed to parse Cloudflare response: %w", err)
 	}
-
-	certPEM, ok := result["certificate"].(string)
+	
+	// Access the certificate from the "result" field
+	resultData, ok := result["result"].(map[string]interface{})
+	if !ok {
+		return nil, errors.New("invalid response format: missing 'result' field")
+	}
+	
+	certPEM, ok := resultData["certificate"].(string)
 	if !ok {
 		return nil, errors.New("invalid certificate response from Cloudflare API")
 	}
-
+	
 	return []byte(certPEM), nil
 }
+
 
 func (o *Issuer) getSecretData(ctx context.Context, issuerSpec *CFMTLSIssuerapi.IssuerSpec, namespace string) (map[string][]byte, error) {
 	secretName := types.NamespacedName{
@@ -193,6 +236,8 @@ func (o *Issuer) Check(ctx context.Context, issuerObject issuerapi.Issuer) error
 
 func (o *Issuer) Sign(ctx context.Context, cr signer.CertificateRequestObject, issuerObject issuerapi.Issuer) (signer.PEMBundle, error) {
 	issuerSpec, namespace, err := o.getIssuerDetails(issuerObject)
+	logger := log.FromContext(ctx).WithName("Sign")
+
 	if err != nil {
 		return signer.PEMBundle{}, signer.IssuerError{Err: err}
 	}
@@ -208,13 +253,25 @@ func (o *Issuer) Sign(ctx context.Context, cr signer.CertificateRequestObject, i
 		return signer.PEMBundle{}, errors.New("missing Cloudflare API key or Zone ID in secret")
 	}
 
-	certTemplate, _, _, err := cr.GetRequest()
+	_, duration, csrPEM, err := cr.GetRequest()
 	if err != nil {
-		return signer.PEMBundle{}, err
+		return signer.PEMBundle{}, fmt.Errorf("failed to get CSR from CertificateRequest: %w", err)
 	}
 
+	// Convert duration (which is in hours) to days
+	durationInDays := int64(duration.Hours() / 24)
+
+	if len(csrPEM) == 0 {
+		return signer.PEMBundle{}, errors.New("CSR in CertificateRequest is empty")
+	}
+
+	// 🔹 Print the CSR before sending
+	logger.V(2).Info("CSR being sent to Cloudflare:\n", string(csrPEM))
+	logger.V(2).Info("Cert duration requested:\n", fmt.Sprintf("%d", durationInDays))
+
+	// 🔹 Pass CSR to CloudflareSigner
 	signerObj := &CloudflareSigner{APIKey: cfAPIKey, ZoneID: zoneID}
-	signed, err := signerObj.Sign(certTemplate)
+	signed, err := signerObj.Sign(ctx, csrPEM, durationInDays)
 	if err != nil {
 		return signer.PEMBundle{}, err
 	}
