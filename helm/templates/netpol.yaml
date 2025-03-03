@@ -1,0 +1,21 @@
+apiVersion: "cilium.io/v2"
+kind: CiliumNetworkPolicy
+metadata:
+  name: {{ include "cfmtls-issuer.fullname" . }}
+  labels:
+    {{- include "cfmtls-issuer.labels" . | nindent 4 }}
+spec:
+  endpointSelector:
+    matchLabels:
+      {{- include "cfmtls-issuer.selectorLabels" . | nindent 6 }}
+  egress:
+  - toFQDNs:
+    - matchName: "api.cloudflare.com"
+    - matchName: "kubernetes.default.svc"
+  - toPorts:
+    - ports:
+      - port: "443"
+        protocol: TCP
+      toFQDNs:
+      - matchName: "api.cloudflare.com"
+      - matchName: "kubernetes.default.svc"

@@ -1,13 +1,13 @@
 # bind the cert-manager internal approver to approve
-# mtls-issuer.cfl CertificateRequests
+# cfmtls.cert.manager.io CertificateRequests
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: cert-manager-controller-approve:mtls-issuer.cfl
+  name: cert-manager-controller-approve:cfmtls.cert.manager.io
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: cert-manager-controller-approve:mtls-issuer.cfl
+  name: cert-manager-controller-approve:cfmtls.cert.manager.io
 subjects:
 - kind: ServiceAccount
   name: cert-manager

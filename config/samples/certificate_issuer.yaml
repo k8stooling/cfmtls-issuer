@@ -7,5 +7,5 @@ spec:
   secretName: certificate-by-CFMTLSIssuer
   issuerRef:
     name: CFMTLSIssuer-sample
-    group: mtls-issuer.cfl
+    group: cfmtls.cert.manager.io
     kind: CFMTLSIssuer

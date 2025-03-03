@@ -42,10 +42,6 @@ type CFMTLSIssuer struct {
 
 // IssuerSpec defines the desired state of CFMTLSIssuer
 type IssuerSpec struct {
-	// URL is the base URL for the endpoint of the signing service,
-	// for example: "https://sample-signer.example.com/api".
-	URL string `json:"url"`
-
 	// A reference to a Secret in the same namespace as the referent. If the
 	// referent is a CFMTLSClusterIssuer, the reference instead refers to the resource
 	// with the given name in the configured 'cluster resource namespace', which
@@ -68,7 +64,7 @@ func (vi *CFMTLSIssuer) GetStatus() *v1alpha1.IssuerStatus {
 // with an issuerName set to eg. "simpleclusterissuers.issuer.cert-manager.io/issuer1".
 func (vi *CFMTLSIssuer) GetIssuerTypeIdentifier() string {
 	// ACTION REQUIRED: Change this to a unique string that identifies your issuer
-	return "CFMTLSIssuers.mtls-issuer.cfl"
+	return "CFMTLSIssuers.cfmtls.cert.manager.io"
 }
 
 // issuer-lib requires that we implement the Issuer interface

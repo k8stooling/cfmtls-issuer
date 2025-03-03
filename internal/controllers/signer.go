@@ -88,15 +88,15 @@ func convertDurationToDays(duration string) (int, error) {
 }
 
 
-// +kubebuilder:rbac:groups=mtls-issuer.cfl,resources=CFMTLSClusterIssuers;CFMTLSIssuers,verbs=get;list;watch
-// +kubebuilder:rbac:groups=mtls-issuer.cfl,resources=CFMTLSClusterIssuers/status;CFMTLSIssuers/status,verbs=patch
+// +kubebuilder:rbac:groups=cfmtls.cert.manager.io,resources=CFMTLSClusterIssuers;CFMTLSIssuers,verbs=get;list;watch
+// +kubebuilder:rbac:groups=cfmtls.cert.manager.io,resources=CFMTLSClusterIssuers/status;CFMTLSIssuers/status,verbs=patch
 // +kubebuilder:rbac:groups="",resources=events,verbs=create;patch
 // +kubebuilder:rbac:groups="",resources=secrets,verbs=get;list;watch
 // +kubebuilder:rbac:groups=cert-manager.io,resources=certificaterequests,verbs=get;list;watch
 // +kubebuilder:rbac:groups=cert-manager.io,resources=certificaterequests/status,verbs=patch
 // +kubebuilder:rbac:groups=certificates.k8s.io,resources=certificatesigningrequests,verbs=get;list;watch
 // +kubebuilder:rbac:groups=certificates.k8s.io,resources=certificatesigningrequests/status,verbs=patch
-// +kubebuilder:rbac:groups=certificates.k8s.io,resources=signers,verbs=sign,resourceNames=CFMTLSClusterIssuers.mtls-issuer.cfl/*;CFMTLSIssuers.mtls-issuer.cfl/*
+// +kubebuilder:rbac:groups=certificates.k8s.io,resources=signers,verbs=sign,resourceNames=CFMTLSClusterIssuers.cfmtls.cert.manager.io/*;CFMTLSIssuers.cfmtls.cert.manager.io/*
 
 func (s Issuer) SetupWithManager(ctx context.Context, mgr ctrl.Manager) error {
 	s.client = mgr.GetClient()
@@ -222,17 +222,68 @@ func (o *Issuer) getSecretData(ctx context.Context, issuerSpec *CFMTLSIssuerapi.
 	return secret.Data, nil
 }
 
-// Check checks that the CA it is available. Certificate requests will not be
-// processed until this check passes.
-func (o *Issuer) Check(ctx context.Context, issuerObject issuerapi.Issuer) error {
-	issuerSpec, namespace, err := o.getIssuerDetails(issuerObject)
-	if err != nil {
-		return err
-	}
+// validateCloudflareToken validates the Cloudflare API token by calling the /user/tokens/verify endpoint
+func validateCloudflareToken(apiKey string) error {
+    // Prepare the request headers
+    req, err := http.NewRequest("GET", "https://api.cloudflare.com/client/v4/user/tokens/verify", nil)
+    if err != nil {
+        return fmt.Errorf("failed to create HTTP request: %w", err)
+    }
 
-	_, err = o.getSecretData(ctx, issuerSpec, namespace)
-	return err
+    req.Header.Set("Authorization", "Bearer "+apiKey)
+    req.Header.Set("Content-Type", "application/json")
+
+    client := &http.Client{Timeout: 10 * time.Second}
+    resp, err := client.Do(req)
+    if err != nil {
+        return fmt.Errorf("failed to send request to Cloudflare: %w", err)
+    }
+    defer resp.Body.Close()
+
+    if resp.StatusCode != http.StatusOK {
+        return fmt.Errorf("Cloudflare token validation failed with status: %d", resp.StatusCode)
+    }
+
+    // Optionally, log the response or check for specific content in the response
+    return nil
 }
+
+
+func (o *Issuer) Check(ctx context.Context, issuerObject issuerapi.Issuer) error {
+    issuerSpec, namespace, err := o.getIssuerDetails(issuerObject)
+    if err != nil {
+        return err
+    }
+
+    // Get secret data from Cloudflare
+    secretData, err := o.getSecretData(ctx, issuerSpec, namespace)
+    if err != nil {
+        return err
+    }
+
+    cfAPIKey := string(secretData["cloudflare-api-key"])
+    if cfAPIKey == "" {
+        return errors.New("missing Cloudflare API key in secret")
+    }
+
+    // Validate the Cloudflare token
+    if err := validateCloudflareToken(cfAPIKey); err != nil {
+        return fmt.Errorf("Cloudflare token validation failed: %w", err)
+    }
+
+    // Additional health checks (e.g., Cloudflare CA cert check)
+    checker, err := o.HealthCheckerBuilder(issuerSpec, secretData)
+    if err != nil {
+        return fmt.Errorf("%w: %v", errHealthCheckerBuilder, err)
+    }
+
+    if err := checker.Check(); err != nil {
+        return fmt.Errorf("%w: %v", errHealthCheckerCheck, err)
+    }
+
+    return nil
+}
+
 
 func (o *Issuer) Sign(ctx context.Context, cr signer.CertificateRequestObject, issuerObject issuerapi.Issuer) (signer.PEMBundle, error) {
 	issuerSpec, namespace, err := o.getIssuerDetails(issuerObject)

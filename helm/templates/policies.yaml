@@ -1,0 +1,41 @@
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: {{ include "cfmtls-issuer.fullname" . }}-validate-usages
+  labels:
+    {{- include "cfmtls-issuer.labels" . | nindent 4 }}
+  annotations:
+    policies.kyverno.io/title: Validate CFMTLS Certificate Usages
+    policies.kyverno.io/category: Cert-Manager, Custom
+    policies.kyverno.io/severity: high
+    policies.kyverno.io/subject: Certificate
+    policies.kyverno.io/description: >-
+      Ensures that Certificate referencing either CFMTLSIssuer or
+      CFMTLSClusterIssuer must have 'client auth' in their usages.
+spec:
+  validationFailureAction: Enforce
+  background: true
+  rules:
+    - name: validate-client-auth-usage
+      match:
+        any:
+          - resources:
+              kinds:
+                - Certificate
+              apiGroups:
+                - cert-manager.io
+      preconditions:
+        all:
+          - key: "{{request.object.spec.issuerRef.kind}}"
+            operator: In
+            value:
+              - CFMTLSClusterIssuer
+              - CFMTLSIssuer
+      validate:
+        message: >-
+          Certificates for CFMTLSIssuer and CFMTLSClusterIssuer must
+          include 'client auth' in their usages.
+        anyPattern:
+          - spec:
+              usages:
+                - "client auth"

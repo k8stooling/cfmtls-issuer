@@ -1,0 +1,7 @@
+{{- if .Values.crds.create -}}
+{{- range $path, $bytes := .Files.Glob "crds/*" }}
+{{ $path | indent 0 }}
+{{ $bytes | indent 2 }}
+---
+{{- end }}
+{{- end }}

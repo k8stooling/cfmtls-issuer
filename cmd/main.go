@@ -244,6 +244,15 @@ func main() {
 		os.Exit(1)
 	}
 
+	// customController := &controllers.CustomIssuerController{}
+	
+	// if err := customController.SetupWithManager(mgr); err != nil {
+	//   setupLog.Error(err, "unable to set up controller")
+	// 	 os.Exit(1)
+	// } else {
+	// 	 setupLog.Info("customController set up successfully")
+	//}
+
 	ctx, cancel := context.WithCancel(ctrl.SetupSignalHandler())
 	defer cancel()
 

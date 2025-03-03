@@ -55,7 +55,7 @@ func (vi *CFMTLSClusterIssuer) GetStatus() *v1alpha1.IssuerStatus {
 // with an issuerName set to eg. "simpleclusterissuers.issuer.cert-manager.io/issuer1".
 func (vi *CFMTLSClusterIssuer) GetIssuerTypeIdentifier() string {
 	// ACTION REQUIRED: Change this to a unique string that identifies your cluster issuer
-	return "CFMTLSClusterIssuers.mtls-issuer.cfl"
+	return "CFMTLSClusterIssuers.cfmtls.cert.manager.io"
 }
 
 // issuer-lib requires that we implement the Issuer interface

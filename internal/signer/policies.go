@@ -52,20 +52,21 @@ type PermissiveSigningPolicy struct {
 }
 
 func (p PermissiveSigningPolicy) apply(tmpl *x509.Certificate) error {
-	usage, extUsages, err := keyUsagesFromStrings(p.Usages)
-	if err != nil {
-		return err
-	}
-	tmpl.KeyUsage = usage
-	tmpl.ExtKeyUsage = extUsages
-	tmpl.NotAfter = tmpl.NotBefore.Add(p.TTL)
+    usage, extUsages, err := keyUsagesFromStrings(p.Usages)
+    if err != nil {
+        return err
+    }
+    tmpl.KeyUsage = usage
+    tmpl.ExtKeyUsage = extUsages
+    tmpl.NotAfter = tmpl.NotBefore.Add(p.TTL)
 
-	tmpl.ExtraExtensions = nil
-	tmpl.Extensions = nil
-	tmpl.BasicConstraintsValid = true
-	tmpl.IsCA = false
+    // Clear any other extensions, as per policy
+    tmpl.ExtraExtensions = nil
+    tmpl.Extensions = nil
+    tmpl.BasicConstraintsValid = true
+    tmpl.IsCA = false
 
-	return nil
+    return nil
 }
 
 var keyUsageDict = map[capi.KeyUsage]x509.KeyUsage{
@@ -140,3 +141,14 @@ func (s sortedExtKeyUsage) Swap(i, j int) {
 func (s sortedExtKeyUsage) Less(i, j int) bool {
 	return s[i] < s[j]
 }
+
+
+// NewClientAuthSigningPolicy is a constructor for a signing policy that only
+// allows certificates with Client Authentication.
+func NewClientAuthSigningPolicy(ttl time.Duration) *PermissiveSigningPolicy {
+    return &PermissiveSigningPolicy{
+        TTL:    ttl,
+        Usages: []capi.KeyUsage{capi.UsageClientAuth}, // Only allow ClientAuth usage
+    }
+}
+

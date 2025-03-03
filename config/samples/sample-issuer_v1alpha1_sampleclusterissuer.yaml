@@ -1,4 +1,4 @@
-apiVersion: mtls-issuer.cfl/v1alpha1
+apiVersion: cfmtls.cert.manager.io/v1alpha1
 kind: CFMTLSClusterIssuer
 metadata:
   labels:
@@ -7,4 +7,4 @@ metadata:
   name: CFMTLSClusterIssuer-sample
 spec:
   authSecretName: "CFMTLSClusterIssuer-sample-credentials"
-  url: "http://mtls-issuer.cfl/api/v1"
+  url: "http://cfmtls.cert.manager.io/api/v1"
