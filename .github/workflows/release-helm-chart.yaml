@@ -24,7 +24,7 @@ jobs:
 
     - name: Authenticate with GHCR
       env:
-        CR_PAT: ${{ secrets.TOKEN }}  # Default GitHub token
+        CR_PAT: ${{ secrets.GITHUB_TOKEN }}  # Default GitHub token
       run: echo "${CR_PAT}" | helm registry login ghcr.io --username ${{ github.actor }} --password-stdin
 
     - name: Package Helm Chart
