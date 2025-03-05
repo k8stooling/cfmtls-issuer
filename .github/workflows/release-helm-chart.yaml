@@ -35,5 +35,6 @@ jobs:
 
     - name: Push Helm Chart to GHCR
       run: |
+        cd helm
         CHART_VERSION=$(helm show chart . | grep 'version:' | awk '{print $2}')
         helm push packaged-chart.tgz oci://ghcr.io/${{ github.repository_owner }}/charts
