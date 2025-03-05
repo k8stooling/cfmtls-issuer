@@ -1,0 +1,39 @@
+name: Release Helm Chart
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  release-helm-chart:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: write  # Required to push to GHCR
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v3
+
+    - name: Set up Helm
+      uses: azure/setup-helm@v3
+      with:
+        version: v3.10.0  # Specify the desired Helm version
+
+    - name: Authenticate with GHCR
+      env:
+        CR_PAT: ${{ secrets.GITHUB_TOKEN }}  # Default GitHub token
+      run: echo "${CR_PAT}" | helm registry login ghcr.io --username ${{ github.actor }} --password-stdin
+
+    - name: Package Helm Chart
+      run: |
+        cd helm
+        helm package . 
+        mv *.tgz packaged-chart.tgz
+
+    - name: Push Helm Chart to GHCR
+      run: |
+        CHART_VERSION=$(helm show chart . | grep 'version:' | awk '{print $2}')
+        helm push packaged-chart.tgz oci://ghcr.io/${{ github.repository_owner }}/charts
