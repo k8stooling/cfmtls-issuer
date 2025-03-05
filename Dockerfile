@@ -13,6 +13,7 @@ RUN go mod download
 
 # Copy the go source
 COPY cmd/main.go cmd/main.go
+COPY cmd/approver.go cmd/approver.go
 COPY api/ api/
 COPY internal/ internal/
 
@@ -27,7 +28,8 @@ ENV GO111MODULE=on
 
 # Do an initial compilation before setting the version so that there is less to
 # re-compile when the version changes
-RUN go build -mod=readonly ./...
+RUN go mod tidy
+# RUN go build -mod=readonly ./...
 
 ARG VERSION
 
@@ -37,11 +39,18 @@ RUN go build \
   -mod=readonly \
   -o manager cmd/main.go
 
+# Build
+RUN go build \
+  -ldflags="-X=github.com/krisek/cfmtls-issuer/internal/version.Version=${VERSION}" \
+  -o approver cmd/approver.go
+
 # Use distroless as minimal base image to package the manager binary
 # Refer to https://github.com/GoogleContainerTools/distroless for more details
 FROM gcr.io/distroless/static:nonroot
 WORKDIR /
 COPY --from=builder /workspace/manager .
+COPY --from=builder /workspace/approver .
+
 USER 65532:65532
 
 ENTRYPOINT ["/manager"]
