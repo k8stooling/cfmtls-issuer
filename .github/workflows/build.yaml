@@ -35,16 +35,14 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: ghcr.io/krisek/cfmtls-issuer
-          tags: |
-            type=raw,value=latest
-            type=ref,event=tag
+          tags: latest
 
       - name: Login to GHCR
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
-          password: ${{ secrets.TOKEN }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build container
         uses: docker/build-push-action@v5
