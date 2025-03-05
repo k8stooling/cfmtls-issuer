@@ -1,3 +1,4 @@
+{{- if .Values.kyverno.enabled }}
 apiVersion: kyverno.io/v1
 kind: ClusterPolicy
 metadata:
@@ -26,7 +27,7 @@ spec:
                 - cert-manager.io
       preconditions:
         all:
-          - key: "{{request.object.spec.issuerRef.kind}}"
+          - key: "{{ "{{" }} request.object.spec.issuerRef.kind {{ "}}" }}"
             operator: In
             value:
               - CFMTLSClusterIssuer
@@ -39,3 +40,4 @@ spec:
           - spec:
               usages:
                 - "client auth"
+{{- end }}

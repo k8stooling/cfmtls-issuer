@@ -1,3 +1,4 @@
+{{- if .Values.CiliumNetworkPolicy.enabled }}
 apiVersion: "cilium.io/v2"
 kind: CiliumNetworkPolicy
 metadata:
@@ -19,3 +20,4 @@ spec:
       toFQDNs:
       - matchName: "api.cloudflare.com"
       - matchName: "kubernetes.default.svc"
+{{- end }}

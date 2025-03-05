@@ -4,5 +4,5 @@ description: A Helm chart for deploying the CFMTLS Issuer
 
 type: application
 
-version: 0.1.0
-appVersion: "1.0"
+version: 2025.3.5
+appVersion: "2025.3.5"
