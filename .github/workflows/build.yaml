@@ -15,28 +15,41 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Extract Version
+        id: extract_version
+        run: |
+          VERSION=$(echo "${GITHUB_REF#refs/tags/v}")
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+          echo "::notice title=Extracted Version::$VERSION"
+
       # Add your test steps here if needed...
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
+
       - name: Docker meta
         id: meta
         uses: docker/metadata-action@v5
         with:
           images: ghcr.io/krisek/cfmtls-issuer
-          tags: latest
+          tags: |
+            type=raw,value=latest
+            type=ref,event=tag
+            
       - name: Login to GHCR
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Build container
         uses: docker/build-push-action@v5
         with:
           context: .
           push: true
-          platforms: linux/amd64
-          #,linux/arm64
+          platforms: linux/amd64,linux/arm64
           tags: ${{ steps.meta.outputs.tags }}
