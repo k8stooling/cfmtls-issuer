@@ -34,7 +34,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ghcr.io/krisek/cfmtls-issuer
+          images: ghcr.io/k8stooling/cfmtls-issuer
           tags: |
             type=raw,value=latest
             type=ref,event=tag

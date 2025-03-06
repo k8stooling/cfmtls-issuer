@@ -17,7 +17,7 @@ This project implements an external issuer for [cert-manager](https://cert-manag
 Deploy the CFMTLS Issuer using Helm:
 
 ```sh
-helm install cfmtls-issuer oci://ghcr.io/krisek/charts/cfmtls-issuer --version 2025.3.5
+helm install cfmtls-issuer oci://ghcr.io/k8stooling/charts/cfmtls-issuer --version 2025.3.5
 ```
 
 ### Configuration via Helm Values
