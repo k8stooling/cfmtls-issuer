@@ -1,7 +1,7 @@
 replicaCount: 1
 
 image:
-  repository: ghcr.io/krisek/cfmtls-issuer
+  repository: ghcr.io/k8stooling/cfmtls-issuer
   tag: latest
   pullPolicy: Always
 

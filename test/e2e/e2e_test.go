@@ -27,7 +27,7 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
-	"github.com/krisek/cfmtls-issuer/test/utils"
+	"github.com/k8stooling/cfmtls-issuer/test/utils"
 )
 
 // namespace where the project is deployed in

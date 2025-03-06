@@ -35,7 +35,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
-	CFMTLSIssuerapi "github.com/krisek/cfmtls-issuer/api/v1alpha1"
+	CFMTLSIssuerapi "github.com/k8stooling/cfmtls-issuer/api/v1alpha1"
 
 	// "encoding/base64"
 

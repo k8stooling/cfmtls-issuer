@@ -23,8 +23,8 @@ import (
 
 	capi "k8s.io/api/certificates/v1beta1"
 
-	CFMTLSIssuerapi "github.com/krisek/cfmtls-issuer/api/v1alpha1"
-	"github.com/krisek/cfmtls-issuer/internal/controllers"
+	CFMTLSIssuerapi "github.com/k8stooling/cfmtls-issuer/api/v1alpha1"
+	"github.com/k8stooling/cfmtls-issuer/internal/controllers"
 )
 
 func ExampleHealthCheckerFromIssuerAndSecretData(*CFMTLSIssuerapi.IssuerSpec, map[string][]byte) (controllers.HealthChecker, error) {

@@ -6,7 +6,7 @@ domain: example.com
 layout:
 - go.kubebuilder.io/v4
 projectName: sample-external-issuer
-repo: github.com/krisek/cfmtls-issuer
+repo: github.com/k8stooling/cfmtls-issuer
 resources:
 - api:
     crdVersion: v1
@@ -14,13 +14,13 @@ resources:
   domain: example.com
   group: sample-issuer
   kind: CFMTLSIssuer
-  path: github.com/krisek/cfmtls-issuer/api/v1alpha1
+  path: github.com/k8stooling/cfmtls-issuer/api/v1alpha1
   version: v1alpha1
 - api:
     crdVersion: v1
   domain: example.com
   group: sample-issuer
   kind: CFMTLSClusterIssuer
-  path: github.com/krisek/cfmtls-issuer/api/v1alpha1
+  path: github.com/k8stooling/cfmtls-issuer/api/v1alpha1
   version: v1alpha1
 version: "3"

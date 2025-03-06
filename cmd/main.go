@@ -42,11 +42,11 @@ import (
 	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
 
-	"github.com/krisek/cfmtls-issuer/internal/controllers"
-	"github.com/krisek/cfmtls-issuer/internal/signer"
-	"github.com/krisek/cfmtls-issuer/internal/version"
+	"github.com/k8stooling/cfmtls-issuer/internal/controllers"
+	"github.com/k8stooling/cfmtls-issuer/internal/signer"
+	"github.com/k8stooling/cfmtls-issuer/internal/version"
 
-	CFMTLSIssuerv1alpha1 "github.com/krisek/cfmtls-issuer/api/v1alpha1"
+	CFMTLSIssuerv1alpha1 "github.com/k8stooling/cfmtls-issuer/api/v1alpha1"
 	// +kubebuilder:scaffold:imports
 )
 

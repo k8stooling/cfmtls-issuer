@@ -35,13 +35,13 @@ ARG VERSION
 
 # Build
 RUN go build \
-  -ldflags="-X=github.com/krisek/cfmtls-issuer/internal/version.Version=${VERSION}" \
+  -ldflags="-X=github.com/k8stooling/cfmtls-issuer/internal/version.Version=${VERSION}" \
   -mod=readonly \
   -o manager cmd/main.go
 
 # Build
 RUN go build \
-  -ldflags="-X=github.com/krisek/cfmtls-issuer/internal/version.Version=${VERSION}" \
+  -ldflags="-X=github.com/k8stooling/cfmtls-issuer/internal/version.Version=${VERSION}" \
   -o approver cmd/approver.go
 
 # Use distroless as minimal base image to package the manager binary
