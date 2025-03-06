@@ -1,8 +1,4 @@
-<p align="center">
-  <img src="https://raw.githubusercontent.com/cert-manager/cert-manager/d53c0b9270f8cd90d908460d69502694e1838f5f/logo/logo-small.png" height="256" width="256" alt="cert-manager project logo" />
-</p>
-
-# cloudflare-mtls-issuer: cert-manager External Issuer for Cloudflare MTLS
+# <img src="https://raw.githubusercontent.com/cert-manager/cert-manager/d53c0b9270f8cd90d908460d69502694e1838f5f/logo/logo-small.png" alt="cert-manager project logo" style="height: 1em; width: 1em; vertical-align: middle; margin-right: 0.2em;"/> cert-manager.io External Issuer for Cloudflare MTLS
 
 This project implements an external issuer for [cert-manager](https://cert-manager.io/) that leverages Cloudflare's Mutual TLS (mTLS) certificate authority (CA). This issuer allows you to manage and automate Cloudflare mTLS certificate issuance within your Kubernetes clusters using the cert-manager framework.
 
