@@ -10,7 +10,19 @@ This project implements an external issuer for [cert-manager](https://cert-manag
 
 ## Installation
 
-Deploy the CFMTLS Issuer using Helm:
+1. First, you need to install cert-manager.io as per https://cert-manager.io/docs/installation/.
+
+> 📖 kubectl apply: For new users we recommend installing cert-manager using kubectl apply and static manifests.
+>
+> 📖 helm: You can use helm to install cert-manager and this also allows you to customize the installation if necessary.
+> 
+> 📖 OperatorHub: If you have an OpenShift cluster, consider installing cert-manager via OperatorHub, which you can do from the OpenShift web console.
+> 
+> 🚧 cmctl: Try the experimental cmctl x install command to quickly install cert-manager.
+
+As cfmtls-issuer is distributed as a Helm chart, it is pretty straightforward to install cert-manager.io with Helm too. 
+
+2. Deploy the CFMTLS Issuer using Helm:
 
 ```sh
 helm install cfmtls-issuer oci://ghcr.io/k8stooling/charts/cfmtls-issuer --version 2025.3.5
