@@ -95,7 +95,7 @@ By default, certificates may require manual approval.
 
 ### Manual Approval
 
-To manually approve a CertificateSigningRequest (CSR):
+You can use the cert-manager kubectl plugin to manually approve a CertificateSigningRequests (CSR):
 
 ```sh
 kubectl get csr
@@ -104,7 +104,7 @@ kubectl cert-manager approve <csr-name>
 
 ### Automatic Approval
 
-Enable the built-in approver in `values.yaml`:
+Or alternatively, you can enable the built-in approver shipped with the issuer in `values.yaml`:
 
 ```yaml
 approver:
