@@ -113,12 +113,6 @@ approver:
 
 This allows certificates to be automatically approved without manual intervention.
 
-## Security Considerations
-
-- Ensure that secrets are properly stored and managed.
-- Use `kyverno` or `CiliumNetworkPolicy` for additional security controls.
-- Restrict API access to trusted sources only.
-
 ## Troubleshooting
 
 Standard procedures apply
